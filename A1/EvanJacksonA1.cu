@@ -6,7 +6,7 @@
 float total = 0;
 
 __global__
-void vecAdd(float* aDevice, float* bDevice, float* cDevice){
+void vecAdd(int* aDevice, int* bDevice, int* cDevice){
     int i = threadIdx.x + blockDim.x * blockId.x; // get location of thread
     if(i < SIZE){
         cDevice[i] = aDevice[i] + bDevice[i];//add to c and save to total
@@ -16,12 +16,13 @@ void vecAdd(float* aDevice, float* bDevice, float* cDevice){
 
 //host code
 int main(){
-    int arraySize = SIZE * sizeof(float);
-    float* aHost, bHost, cHost, aDevice, bDevice, cDevice;
+    int arraySize = SIZE * sizeof(int);
+    int* aHost, bHost, cHost, aDevice, bDevice, cDevice;
 
     //allocate for host and store
-    aHost = (float*)malloc(arraySize);
-    bHost = (float*)malloc(arraySize);
+    aHost = (int*)malloc(arraySize);
+    bHost = (int*)malloc(arraySize);
+    cHost = (int*)malloc(arraySize);
     //fill array aHost
     for(int i = 0; i < SIZE; i++){
         aHost[i] = i;
@@ -32,8 +33,9 @@ int main(){
     }
 
     //allocate memory for device and transfer to device
-    cudaMalloc((void**) &aDevice, arraySize);
-    cudaMalloc((void**) &bDevice, arraySize);
+    cudaMalloc(&aDevice, arraySize);
+    cudaMalloc(&bDevice, arraySize);
+    cudaMalloc(&cDevice, arraySize)
     cudaMemcpy(aDevice, aHost, arraySize, cudaMemcpyHostToDevice);
     cudaMemcpy(bDevice, bHost, arraySize, cudaMemcpyHostToDevice);
 
@@ -53,4 +55,6 @@ int main(){
     printf("First element of vector C: %i\n", cHost[0]);
     printf("Last element of vector C: %i\n", cHost[SIZE - 1]);
     printf("Summation of Elements in vector C: %i\n", total);
+
+    return 0;
 }
