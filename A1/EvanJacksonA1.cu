@@ -3,21 +3,26 @@
 
 #define SIZE 4096
 
-float total = 0;
-
 __global__
 void vecAdd(int* aDevice, int* bDevice, int* cDevice){
-    int i = threadIdx.x + blockDim.x * blockId.x; // get location of thread
+    int i = threadIdx.x + blockDim.x * blockIdx.x; // get location of thread
     if(i < SIZE){
         cDevice[i] = aDevice[i] + bDevice[i];//add to c and save to total
-        total += cDevice[i];
     }
 }
 
 //host code
 int main(){
-    int arraySize = SIZE * sizeof(int);
-    int* aHost, bHost, cHost, aDevice, bDevice, cDevice;
+    size_t arraySize = SIZE * sizeof(int);
+    int total = 0;
+    //host vector
+    int* aHost; 
+    int* bHost;
+    int* cHost;
+    //device vector
+    int* aDevice;
+    int* bDevice;
+    int* cDevice;
 
     //allocate for host and store
     aHost = (int*)malloc(arraySize);
@@ -35,7 +40,7 @@ int main(){
     //allocate memory for device and transfer to device
     cudaMalloc(&aDevice, arraySize);
     cudaMalloc(&bDevice, arraySize);
-    cudaMalloc(&cDevice, arraySize)
+    cudaMalloc(&cDevice, arraySize);
     cudaMemcpy(aDevice, aHost, arraySize, cudaMemcpyHostToDevice);
     cudaMemcpy(bDevice, bHost, arraySize, cudaMemcpyHostToDevice);
 
@@ -51,6 +56,11 @@ int main(){
     cudaFree(aDevice);
     cudaFree(bDevice);
     cudaFree(cDevice);
+    //find total of vector
+    for(int i = 0; i < SIZE; i++){
+        total += cHost[i];
+    }
+
     //print values
     printf("First element of vector C: %i\n", cHost[0]);
     printf("Last element of vector C: %i\n", cHost[SIZE - 1]);
