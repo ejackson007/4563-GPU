@@ -34,7 +34,7 @@ int main(){
     }
     //fill array bHost
     for(int i = 0; i < SIZE; i++){
-        bHost[i] = 4905 + i;
+        bHost[i] = 4095 + i;
     }
 
     //allocate memory for device and transfer to device
