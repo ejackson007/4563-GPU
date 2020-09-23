@@ -3,10 +3,10 @@
 
 #define SIZE 4096
 
-int total = 0;
+float total = 0;
 
 __global__
-void vecAdd(int* aDevice, int* bDevice, int* cDevice){
+void vecAdd(float* aDevice, float* bDevice, float* cDevice){
     int i = threadIdx.x + blockDim.x * blockId.x; // get location of thread
     if(i < SIZE){
         cDevice[i] = aDevice[i] + bDevice[i];//add to c and save to total
@@ -16,12 +16,12 @@ void vecAdd(int* aDevice, int* bDevice, int* cDevice){
 
 //host code
 int main(){
-    int arraySize = SIZE * sizeof(int);
-    int* aHost, bHost, cHost, aDevice, bDevice, cDevice;
+    int arraySize = SIZE * sizeof(float);
+    float* aHost, bHost, cHost, aDevice, bDevice, cDevice;
 
     //allocate for host and store
-    aHost = (int*)malloc(arraySize);
-    bHost = (int*)malloc(arraySize);
+    aHost = (float*)malloc(arraySize);
+    bHost = (float*)malloc(arraySize);
     //fill array aHost
     for(int i = 0; i < SIZE; i++){
         aHost[i] = i;
@@ -45,7 +45,7 @@ int main(){
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
-    //free device memory;96
+    //free device memory;
     cudaFree(aDevice);
     cudaFree(bDevice);
     cudaFree(cDevice);
