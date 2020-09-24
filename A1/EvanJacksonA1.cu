@@ -13,6 +13,7 @@ void vecAdd(int* aDevice, int* bDevice, int* cDevice){
 
 //host code
 int main(){
+    //create variable to create arrays
     size_t arraySize = SIZE * sizeof(int);
     int total = 0;
     //host vector
@@ -24,17 +25,14 @@ int main(){
     int* bDevice;
     int* cDevice;
 
-    //allocate for host and store
+    //allocate for host
     aHost = (int*)malloc(arraySize);
     bHost = (int*)malloc(arraySize);
     cHost = (int*)malloc(arraySize);
-    //fill array aHost
+    //fill array aHost and bHost
     for(int i = 0; i < SIZE; i++){
         aHost[i] = i;
-    }
-    //fill array bHost
-    for(int i = 0; i < SIZE; i++){
-        bHost[i] = 4095 + i;
+        Host[i] = 4095 + i;
     }
 
     //allocate memory for device and transfer to device
@@ -44,7 +42,9 @@ int main(){
     cudaMemcpy(aDevice, aHost, arraySize, cudaMemcpyHostToDevice);
     cudaMemcpy(bDevice, bHost, arraySize, cudaMemcpyHostToDevice);
 
-    dim3 dimGrid(4,1,1); //1D of 4 block, so that each block will have maximum threads
+    //the maximum amount of threads is 1024, therefore for optimal use,
+    //each block needs to be size 4 (4096/1024 = 4)
+    dim3 dimGrid(4,1,1);
     dim3 dimBlock(1024,1,1);
 
     //call gpu process
