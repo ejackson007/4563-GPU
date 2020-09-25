@@ -6,9 +6,10 @@
 __global__
 void vecProd2(int* aDevice, int* bDevice, int* cDevice){
     int i = threadIdx.x + blockDim.x * blockIdx.x; // get location of thread
+    int jump = SIZE/5;
     if(i < SIZE){
         for(int x = 1; x <= 5; x++)
-        cDevice[i*x] = aDevice[i*x] * bDevice[i*x];//add to c and save to total
+            cDevice[i + (jump*x)] = aDevice[i + (jump*x)] * bDevice[i + (jump*x)];//add to c and save to total
     }
 }
 
@@ -40,7 +41,7 @@ int main(){
     //fill array aHost and bHost
     for(int i = 0; i < SIZE; i++){
         aHost[i] = 2*i;
-        bHost[i] = 2*1 + 1;
+        bHost[i] = 2*i + 1;
     }
 
     //allocate memory for device and transfer to device
@@ -65,7 +66,7 @@ int main(){
     //reinitiliaze a and b
     for(int i = 0; i < SIZE; i++){
         aHost[i] = 2*i;
-        bHost[i] = 2*1 + 1;
+        bHost[i] = 2*i + 1;
     }
     //reallocate device memory
     cudaMemcpy(aDevice, aHost, arraySize, cudaMemcpyHostToDevice);
