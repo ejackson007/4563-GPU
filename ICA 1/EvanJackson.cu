@@ -24,7 +24,6 @@ void vecProd10(int* aDevice, int* bDevice, int* cDevice){
 int main(){
     //create variable to create arrays
     size_t arraySize = SIZE * sizeof(int);
-    int total = 0;
     //host vector
     int* aHost; 
     int* bHost;
@@ -41,7 +40,7 @@ int main(){
     //fill array aHost and bHost
     for(int i = 0; i < SIZE; i++){
         aHost[i] = 2*i;
-        Host[i] = 2*1 + 1;
+        bHost[i] = 2*1 + 1;
     }
 
     //allocate memory for device and transfer to device
@@ -52,11 +51,11 @@ int main(){
     cudaMemcpy(bDevice, bHost, arraySize, cudaMemcpyHostToDevice);
 
     //maximum amount of threads, with 2 blocks.
-    dim3 dimGrid(2,1,1);
+    dim3 dimGrid2(2,1,1);
     dim3 dimBlock(1024,1,1);
 
     //call gpu process
-    vecProd2<<<dimGrid,dimBlock>>>(aDevice, bDevice, cDevice);
+    vecProd2<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice);
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
@@ -66,7 +65,7 @@ int main(){
     //reinitiliaze a and b
     for(int i = 0; i < SIZE; i++){
         aHost[i] = 2*i;
-        Host[i] = 2*1 + 1;
+        bHost[i] = 2*1 + 1;
     }
     //reallocate device memory
     cudaMemcpy(aDevice, aHost, arraySize, cudaMemcpyHostToDevice);
@@ -75,11 +74,10 @@ int main(){
     //repeat for 10 blocks
 
     //maximum amount of threads, with 10 blocks.
-    dim3 dimGrid(10,1,1);
-    dim3 dimBlock(1024,1,1);
+    dim3 dimGrid10(10,1,1);
 
     //call gpu process
-    vecProd10<<<dimGrid,dimBlock>>>(aDevice, bDevice, cDevice);
+    vecProd10<<<dimGrid10,dimBlock>>>(aDevice, bDevice, cDevice);
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
