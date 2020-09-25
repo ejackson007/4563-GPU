@@ -4,7 +4,16 @@
 #define SIZE 10240
 
 __global__
-void vecProd(int* aDevice, int* bDevice, int* cDevice){
+void vecProd2(int* aDevice, int* bDevice, int* cDevice){
+    int i = threadIdx.x + blockDim.x * blockIdx.x; // get location of thread
+    if(i < SIZE){
+        for(int x = 1; x <= 5; x++)
+        cDevice[i*x] = aDevice[i*x] * bDevice[i*x];//add to c and save to total
+    }
+}
+
+__global__
+void vecProd10(int* aDevice, int* bDevice, int* cDevice){
     int i = threadIdx.x + blockDim.x * blockIdx.x; // get location of thread
     if(i < SIZE){
         cDevice[i] = aDevice[i] * bDevice[i];//add to c and save to total
@@ -47,7 +56,7 @@ int main(){
     dim3 dimBlock(1024,1,1);
 
     //call gpu process
-    vecProd<<<dimGrid,dimBlock>>>(aDevice, bDevice, cDevice);
+    vecProd2<<<dimGrid,dimBlock>>>(aDevice, bDevice, cDevice);
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
@@ -70,7 +79,7 @@ int main(){
     dim3 dimBlock(1024,1,1);
 
     //call gpu process
-    vecProd<<<dimGrid,dimBlock>>>(aDevice, bDevice, cDevice);
+    vecProd10<<<dimGrid,dimBlock>>>(aDevice, bDevice, cDevice);
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
