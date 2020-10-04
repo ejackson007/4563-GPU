@@ -4,9 +4,9 @@
 #define SIZE 10240
 
 __global__
-void vecProdCyclic(int* aDevice, int* bDevice, int* cDevice){
+void vecProdCyclic(int* aDevice, int* bDevice, int* cDevice, int block){
     int i = threadIdx.x + blockDim.x * blockIdx.x; // get location of thread
-    int jump = SIZE/5;
+    int jump = SIZE/block;//creates jump for each thread to make
     if(i < SIZE){
         for(int x = 1; x <= 5; x++)
             cDevice[i + (jump*x)] = aDevice[i + (jump*x)] * bDevice[i + (jump*x)];//add to c and save to total
@@ -60,8 +60,10 @@ int main(){
     dim3 dimBlock(1024,1,1);
 
     //call gpu process
-    for(int i = 0; i < 5; i++){
-        vecProdNonCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, i*(SIZE/5));
+    //Breaks up the full array into processable
+    int jump = (SIZE / 1024) / 2;
+    for(int i = 0; i < jump; i++){
+        vecProdNonCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, i*(SIZE/jump));
     }
 
     //transfer back to host
@@ -82,7 +84,7 @@ int main(){
  **********************************************************************************/ 
 
     //call gpu process
-    vecProdCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice);
+    vecProdCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, jump);
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
@@ -104,7 +106,10 @@ int main(){
     dim3 dimGrid10(10,1,1);
 
     //call gpu process
-    vecProdNonCyclic<<<dimGrid10,dimBlock>>>(aDevice, bDevice, cDevice, 0);
+    jump = (SIZE / 1024) / 10;
+    for(int i = 0; i < jump; i++){
+        vecProdNonCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, i*(SIZE/jump));
+    }
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
@@ -114,7 +119,7 @@ int main(){
     cudaFree(bDevice);
     cudaFree(cDevice);
     //print first and last for 10 blocks
-    printf("10 Blocks (first,last) = {%d, %d)\n", cHost[0], cHost[SIZE - 1]);
+    printf("10 Blocks - (C[0], C[10239]) = {%d, %d)\n", cHost[0], cHost[SIZE - 1]);
 
     return 0;
 }
