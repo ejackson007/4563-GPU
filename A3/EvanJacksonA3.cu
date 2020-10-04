@@ -60,8 +60,8 @@ int main(){
     dim3 dimBlock(1024,1,1);
 
     //call gpu process
-    for(int i = 0; i < (SIZE / 1024) / 2; i++){
-        vecProdNonCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, i*1024);
+    for(int i = 0; i < 5; i++){
+        vecProdNonCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, i*(SIZE/5));
     }
 
     //transfer back to host
