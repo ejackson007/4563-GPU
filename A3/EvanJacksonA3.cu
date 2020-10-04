@@ -108,7 +108,7 @@ int main(){
     //call gpu process
     jump = (SIZE / 1024) / 10;
     for(int i = 0; i < jump; i++){
-        vecProdNonCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, i*(SIZE/jump));
+        vecProdNonCyclic<<<dimGrid10,dimBlock>>>(aDevice, bDevice, cDevice, i*(SIZE/jump));
     }
 
     //transfer back to host
