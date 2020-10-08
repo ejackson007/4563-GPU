@@ -12,30 +12,33 @@ typedef struct complex_t {
 } complex;
 
 __global__
-void oddMultCalc(complex * oddDevice){
+void oddMultCalc(complex * oddDevice, int n){
     int i = threadIdx.x + blockDim.x * blockIdx.x;
     complex result, polar;
-    polar.real = cos(-2.0*M_PI*(i/4096));
-    polar.imag = sin(-2.0*M_PI*(i/4096));
+    if(i < n/2){
+        polar.real = cos(-2.0*M_PI*(i/n));
+        polar.imag = sin(-2.0*M_PI*(i/n));
 
-    result.real = polar.real*oddDevice[i].real - polar.imag-oddDevice[i].imag;
-    result.imag = polar.real*oddDevice[i].imag + polar.imag*oddDevice[i].real;
+        result.real = polar.real*oddDevice[i].real - polar.imag-oddDevice[i].imag;
+        result.imag = polar.real*oddDevice[i].imag + polar.imag*oddDevice[i].real;
 
-    oddDevice[i] = result;
+        oddDevice[i] = result;
+    }
 }
 
 __global__
-void addOddEven(complex * oddDevice, complex * evenDevice, complex * XDevice){
+void addOddEven(complex * oddDevice, complex * evenDevice, complex * XDevice, int n){
     int i = threadIdx.x + blockDim.x * blockIdx.x;
-    XDevice[i].real = evenDevice[i].real + oddDevice[i].real;
-    XDevice[i].imag = evenDevice[i].imag + oddDevice[i].imag;
-    XDevice[i + 4096].real = evenDevice[i].real - oddDevice[i].real;
-    XDevice[i + 4096].imag = evenDevice[i].imag - oddDevice[i].imag;
+    if (i < n/2){
+        XDevice[i].real = evenDevice[i].real + oddDevice[i].real;
+        XDevice[i].imag = evenDevice[i].imag + oddDevice[i].imag;
+        XDevice[i + n/2].real = evenDevice[i].real - oddDevice[i].real;
+        XDevice[i + n/2].imag = evenDevice[i].imag - oddDevice[i].imag;
+    }
 }
 
 complex *fillArray(){
     complex *all_nums = (complex *)malloc(sizeof(struct complex_t) * SIZE);
-    assert(all_nums != NULL);
     all_nums[0].real = 3.6;
     all_nums[0].imag = 2.6;
     all_nums[1].real = 2.9;
@@ -59,8 +62,8 @@ complex *fillArray(){
     return all_nums;
 }
 
-complex *CT_FFT(complex *table, int n){
-    complex * X = (complex *)malloc(sizeof(complex_t * SIZE));
+complex *CT_FFT(complex* table, int n){
+    complex *X = (complex *)malloc(sizeof(struct complex_t) * n);
     complex *odd, *even, *ODD, *EVEN, *XDevice, *oddDevice, *evenDevice;
     
 
@@ -69,8 +72,8 @@ complex *CT_FFT(complex *table, int n){
         return X;
     }
 
-    even = (complex *)malloc(sizeof(complex_t) * n/2);
-    odd = (complex *)malloc(sizeof(complex_t) * n/2);
+    even = (complex *)malloc(sizeof(struct complex_t) * n/2);
+    odd = (complex *)malloc(sizeof(struct complex_t) * n/2);
     //assing odd and even values
     for(int i = 0; i < n/2; i++){
         even[i] = table[2*i];
@@ -80,18 +83,18 @@ complex *CT_FFT(complex *table, int n){
     EVEN = CT_FFT(even, n/2);
     ODD = CT_FFT(odd, n/2);
 
-    cudaMalloc(&oddDevice, SIZE/2);
-    cudaMalloc(&evenDevice, SIZE/2);
-    cudaMalloc(&XDevice, SIZE);
-    cudaMemcpy(oddDevice, ODD, SIZE/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(evenDevice, EVEN, SIZE/2, cudaMemcpyHostToDevice);
+    cudaMalloc(&oddDevice, n/2);
+    cudaMalloc(&evenDevice, n/2);
+    cudaMalloc(&XDevice, n);
+    cudaMemcpy(oddDevice, ODD, n/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(evenDevice, EVEN, n/2, cudaMemcpyHostToDevice);
     cudaMemcpy(XDevice, X, SIZE, cudaMemcpyHostToDevice);
 
     dim3 dimGrid(4,1,1);
     dim3 dimBlock(1024,1,1);
 
-    oddMultCalc<<<dimGrid, dimBlock>>>(oddDevice);
-    addOddEven<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice);
+    oddMultCalc<<<dimGrid, dimBlock>>>(oddDevice, n);
+    addOddEven<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice, n);
 
     cudaMemcpy(X, XDevice, SIZE, cudaMemcpyDeviceToHost);
     free(EVEN);
@@ -110,7 +113,7 @@ int main(){
     printf("=====================================\n");
     for(int i=0; i < 8; i++){
         //print real and imaginary values
-        printf("XR[%d]: %f  XI[%d i]: %f\n", i, printing[i].real, i, printing[i].imag);
+        printf("XR[%d]: %f  XI[%d]: %f i\n", i, printing[i].real, i, printing[i].imag);
         printf("=====================================\n");
     }
     return 0;
