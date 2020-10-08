@@ -1,42 +1,117 @@
 //Evan Jackson
 //Cooley Tukey
+//Joseph Williamson
 
 #include <stdio.h>
 #include <math.h>
-#include <complex.h>
 
 #define SIZE 8192
+typedef struct complex_t {
+    double real;
+    double imag;
+} complex;
 
-cplx *fillArray(){
-    cplx *all_nums = (cplx *)malloc(sizeof(cplx) * SIZE);
+__global__
+void oddMultCalc(complex * oddDevice){
+    int i = threadIdx.x + blockDim.x * blockIdx.x;
+    complex result, polar;
+    polar.real = cos(-2.0*M_PI*(i/4096));
+    polar.imag = sin(-2.0*M_PI*(i/4096));
+
+    result.real = polar.real*oddDevice[i].real - polar.imag-oddDevice[i].imag;
+    result.imag = polar.real*oddDevice[i].imag + polar.imag*oddDevice[i].real;
+
+    oddDevice[i] = result;
+}
+
+__global__
+void addOddEven(complex * oddDevice, complex * evenDevice, complex * XDevice){
+    int i = threadIdx.x + blockDim.x * blockIdx.x;
+    XDevice[i].real = evenDevice[i].real + oddDevice[i].real;
+    XDevice[i].imag = evenDevice[i].imag + oddDevice[i].imag;
+    XDevice[i + 4096].real = evenDevice[i].real - oddDevice[i].real;
+    XDevice[i + 4096].imag = evenDevice[i].imag - oddDevice[i].imag;
+}
+
+complex *fillArray(){
+    complex *all_nums = (complex *)malloc(sizeof(struct complex_t) * SIZE);
     assert(all_nums != NULL);
-    all_nums[0] = 3.6 + 2.6*I;
-    all_nums[1] = 2.9 + 6.3*I;
-    all_nums[2] = 5.6 + 4*I;
-    all_nums[3] = 4.8 + 9.1*I;
-    all_nums[4] = 3.3 + 0.4*I;
-    all_nums[5] = 5.9 + 4.8*I;
-    all_nums[6] = 5 + 2.6*I;
-    all_nums[7] = 4.3 + 4.1*I;
-    for(int i = 8; i < SIZE; i++)
-        all_nums[i] = 0;
+    all_nums[0].real = 3.6;
+    all_nums[0].imag = 2.6;
+    all_nums[1].real = 2.9;
+    all_nums[1].imag = 6.3;
+    all_nums[2].real = 5.6;
+    all_nums[2].imag = 4.0;
+    all_nums[3].real = 4.8;
+    all_nums[3].imag = 9.1;
+    all_nums[4].real = 3.3;
+    all_nums[4].imag = 0.4;
+    all_nums[5].real = 5.9;
+    all_nums[5].imag = 4.8;
+    all_nums[6].real = 5.0;
+    all_nums[6].imag = 2.6;
+    all_nums[7].real = 4.3;
+    all_nums[7].imag = 4.1;
+    for(int i = 8; i < SIZE; i++){
+        all_nums[i].real = 0;
+        all_nums[i].imag = 0;
+    }
     return all_nums;
 }
 
-cplx * CT_FFT(cplx * table, int n){
-    cplx * X = (cplx *)malloc(sizeof(cplx) * SIZE);
-    cplx *odd, *even, *ODD, *EVEN;
+complex *CT_FFT(complex *table, int n){
+    complex * X = (complex *)malloc(sizeof(complex_t * SIZE));
+    complex *odd, *even, *ODD, *EVEN, *XDevice, *oddDevice, *evenDevice;
+    
 
     if (n == 1){
         X[0] = table[0];
         return X;
     }
 
-    even = (cplx *)malloc(sizeof(cplx) * SIZE/2);
-    odd = (cplx *)malloc(sizeof(cplx) * SIZE/2);
-    
+    even = (complex *)malloc(sizeof(complex_t) * n/2);
+    odd = (complex *)malloc(sizeof(complex_t) * n/2);
+    //assing odd and even values
+    for(int i = 0; i < n/2; i++){
+        even[i] = table[2*i];
+        odd[i] = table[2*i + 1];
+    }
+
+    EVEN = CT_FFT(even, n/2);
+    ODD = CT_FFT(odd, n/2);
+
+    cudaMalloc(&oddDevice, SIZE/2);
+    cudaMalloc(&evenDevice, SIZE/2);
+    cudaMalloc(&XDevice, SIZE);
+    cudaMemcpy(oddDevice, ODD, SIZE/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(evenDevice, EVEN, SIZE/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(XDevice, X, SIZE, cudaMemcpyHostToDevice);
+
+    dim3 dimGrid(4,1,1);
+    dim3 dimBlock(1024,1,1);
+
+    oddMultCalc<<<dimGrid, dimBlock>>>(oddDevice);
+    addOddEven<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice);
+
+    cudaMemcpy(X, XDevice, SIZE, cudaMemcpyDeviceToHost);
+    free(EVEN);
+    free(ODD);
+    cudaFree(oddDevice);
+    cudaFree(evenDevice);
+    cudaFree(XDevice);
+    return X;
 }
 
 int main(){
-
+    complex *table, *printing;
+    table = fillArray();
+    printing = CT_FFT(table, SIZE);
+    printf("TOTAL PROCESSED SAMPLES: %d\n", SIZE);
+    printf("=====================================\n");
+    for(int i=0; i < 8; i++){
+        //print real and imaginary values
+        printf("XR[%d]: %f  XI[%d i]: %f\n", i, printing[i].real, i, printing[i].imag);
+        printf("=====================================\n");
+    }
+    return 0;
 }
