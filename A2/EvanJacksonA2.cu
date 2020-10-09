@@ -2,6 +2,8 @@
 //Cooley Tukey
 //Joseph Williamson
 
+//cudaDeviceSynchronize();
+
 #include <stdio.h>
 #include <math.h>
 
