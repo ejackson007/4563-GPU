@@ -21,6 +21,18 @@ void vecProdNonCyclic(int* aDevice, int* bDevice, int* cDevice, int block){
     }
 }
 
+//I am unsure if the function above it, or this is what you would consider block, since both solve
+//the problem by adding chunks of the array at a time, however i figured it would probably be best
+//to add both functions just incase. This approach instead gives each thred an equal amount of 
+//consecutive 
+__global__
+void nonCyclical2(int* aDevice, int* bDevice, int* cDevice){
+    int i = threadIdx.x + blockDim.x * blockIdx.x
+    for(int x = 1; x <= 5; x++){
+        cDevice[i*5 + x] = aDevice[i*5 + x] * bDevice[i*5 + x];
+    }
+}
+
 //host code
 int main(){
     //create variable to create arrays
