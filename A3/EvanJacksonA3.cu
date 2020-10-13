@@ -72,11 +72,7 @@ int main(){
     dim3 dimBlock(1024,1,1);
 
     //call gpu process
-    //Breaks up the full array into processable
-    int jump = (SIZE / 1024) / 2;
-    for(int i = 0; i < jump; i++){
-        vecProdNonCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, i*(SIZE/jump));
-    }
+    nonCyclical2<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice);
 
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
