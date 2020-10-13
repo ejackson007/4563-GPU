@@ -5,6 +5,7 @@
 //cudaDeviceSynchronize();
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 #define SIZE 8192
@@ -32,8 +33,10 @@ __global__
 void addOddEven(complex * oddDevice, complex * evenDevice, complex * XDevice, int n){
     int i = threadIdx.x + blockDim.x * blockIdx.x;
     if (i < n/2){
+        //add
         XDevice[i].real = evenDevice[i].real + oddDevice[i].real;
         XDevice[i].imag = evenDevice[i].imag + oddDevice[i].imag;
+        //subtract
         XDevice[i + n/2].real = evenDevice[i].real - oddDevice[i].real;
         XDevice[i + n/2].imag = evenDevice[i].imag - oddDevice[i].imag;
     }
@@ -85,15 +88,17 @@ complex *CT_FFT(complex* table, int n){
     EVEN = CT_FFT(even, n/2);
     ODD = CT_FFT(odd, n/2);
 
-    cudaMalloc(&oddDevice, n/2);
-    cudaMalloc(&evenDevice, n/2);
-    cudaMalloc(&XDevice, n);
-    cudaMemcpy(oddDevice, ODD, n/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(evenDevice, EVEN, n/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(XDevice, X, SIZE, cudaMemcpyHostToDevice);
+    cudaMalloc(&oddDevice, SIZE/2);
+    cudaMalloc(&evenDevice, SIZE/2);
+    cudaMalloc(&XDevice, SIZE);
+    cudaMemcpy(oddDevice, ODD, SIZE/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(evenDevice, EVEN, SIZE/2, cudaMemcpyHostToDevice);
+    //cudaMemcpy(XDevice, table, n, cudaMemcpyHostToDevice);
 
     dim3 dimGrid(4,1,1);
+    cudaDeviceSynchronize();
     dim3 dimBlock(1024,1,1);
+    cudaDeviceSynchronize();
 
     oddMultCalc<<<dimGrid, dimBlock>>>(oddDevice, n);
     addOddEven<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice, n);
@@ -103,7 +108,7 @@ complex *CT_FFT(complex* table, int n){
     free(ODD);
     cudaFree(oddDevice);
     cudaFree(evenDevice);
-    cudaFree(XDevice);
+    //cudaFree(XDevice);
     return X;
 }
 
@@ -115,7 +120,7 @@ int main(){
     printf("=====================================\n");
     for(int i=0; i < 8; i++){
         //print real and imaginary values
-        printf("XR[%d]: %f  XI[%d]: %f i\n", i, printing[i].real, i, printing[i].imag);
+        printf("XR[%d]: %f  XI[%d]: %fi\n", i, printing[i].real, i, printing[i].imag);
         printf("=====================================\n");
     }
     return 0;
