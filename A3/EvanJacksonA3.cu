@@ -27,7 +27,7 @@ void vecProdNonCyclic(int* aDevice, int* bDevice, int* cDevice, int block){
 //consecutive 
 __global__
 void nonCyclical2(int* aDevice, int* bDevice, int* cDevice){
-    int i = threadIdx.x + blockDim.x * blockIdx.x
+    int i = threadIdx.x + blockDim.x * blockIdx.x;
     for(int x = 0; x < 5; x++){
         cDevice[i*5 + x] = aDevice[i*5 + x] * bDevice[i*5 + x];
     }
@@ -74,11 +74,12 @@ int main(){
     //call gpu process
     nonCyclical2<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice);
 
+
     //transfer back to host
     cudaMemcpy(cHost, cDevice, arraySize, cudaMemcpyDeviceToHost);
 
     //print for 2 block size
-    printf("2 Blocks - Cyclic(C[0], C[10239]) = {%d, %d)\n", cHost[0], cHost[SIZE - 1]);
+    printf("2 Blocks - Not Cyclic(C[0], C[10239]) = {%d, %d)\n", cHost[0], cHost[SIZE - 1]);
 
     //reset C array
     for(int i = 0; i < SIZE; i++){
@@ -91,6 +92,7 @@ int main(){
  ******************** 2 Blocks, Cyclic ********************************************
  **********************************************************************************/ 
 
+    int jump = (SIZE / 1024) / 2;
     //call gpu process
     vecProdCyclic<<<dimGrid2,dimBlock>>>(aDevice, bDevice, cDevice, jump);
 
