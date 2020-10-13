@@ -28,7 +28,7 @@ void vecProdNonCyclic(int* aDevice, int* bDevice, int* cDevice, int block){
 __global__
 void nonCyclical2(int* aDevice, int* bDevice, int* cDevice){
     int i = threadIdx.x + blockDim.x * blockIdx.x
-    for(int x = 1; x <= 5; x++){
+    for(int x = 0; x < 5; x++){
         cDevice[i*5 + x] = aDevice[i*5 + x] * bDevice[i*5 + x];
     }
 }
