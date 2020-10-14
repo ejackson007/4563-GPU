@@ -37,8 +37,8 @@ void addOddEven(complex * oddDevice, complex * evenDevice, complex * XDevice, in
     }
 }
 
-complex *fillArray(){
-    complex *all_nums = (complex *)malloc(sizeof(struct complex_t) * SIZE);
+complex *fillArray(int size){
+    complex *all_nums = (complex *)malloc(sizeof(struct complex_t) * size);
     all_nums[0].real = 3.6;
     all_nums[0].imag = 2.6;
     all_nums[1].real = 2.9;
@@ -55,7 +55,7 @@ complex *fillArray(){
     all_nums[6].imag = 2.6;
     all_nums[7].real = 4.3;
     all_nums[7].imag = 4.1;
-    for(int i = 8; i < SIZE; i++){
+    for(int i = 8; i < size; i++){
         all_nums[i].real = 0;
         all_nums[i].imag = 0;
     }
@@ -88,7 +88,7 @@ complex *CT_FFT(complex* table, int n){
     cudaMalloc(&XDevice, n);
     cudaMemcpy(oddDevice, ODD, n/2, cudaMemcpyHostToDevice);
     cudaMemcpy(evenDevice, EVEN, n/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(XDevice, X, SIZE, cudaMemcpyHostToDevice);
+    cudaMemcpy(XDevice, X, n, cudaMemcpyHostToDevice);
 
     dim3 dimGrid(4,1,1);
     dim3 dimBlock(1024,1,1);
@@ -109,9 +109,9 @@ complex *CT_FFT(complex* table, int n){
 
 int main(){
     complex *table, *printing;
-    table = fillArray();
-    printing = CT_FFT(table, SIZE);
-    printf("TOTAL PROCESSED SAMPLES: %d\n", SIZE);
+    table = fillArray(8);
+    printing = CT_FFT(table, 8);
+    printf("TOTAL PROCESSED SAMPLES: %d\n", 8);
     printf("=====================================\n");
     for(int i=0; i < 8; i++){
         //print real and imaginary values
