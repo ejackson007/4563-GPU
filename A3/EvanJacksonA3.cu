@@ -7,18 +7,14 @@ __global__
 void vecProdCyclic(int* aDevice, int* bDevice, int* cDevice, int block){
     int i = threadIdx.x + blockDim.x * blockIdx.x; // get location of thread
     int jump = SIZE/block;//creates jump for each thread to make
-    if(i < SIZE){
-        for(int x = 1; x <= 5; x++)
-            cDevice[i + (jump*x)] = aDevice[i + (jump*x)] * bDevice[i + (jump*x)];//add to c and save to total
-    }
+    for(int x = 1; x <= 5; x++)
+        cDevice[i + (jump*x)] = aDevice[i + (jump*x)] * bDevice[i + (jump*x)];//add to c and save to total
 }
 
 __global__
 void vecProdNonCyclic(int* aDevice, int* bDevice, int* cDevice, int block){
     int i = threadIdx.x + blockDim.x * blockIdx.x; // get location of thread
-    if(i < SIZE){
-        cDevice[i + block] = aDevice[i + block] * bDevice[i + block];//add to c and save to total
-    }
+    cDevice[i + block] = aDevice[i + block] * bDevice[i + block];//add to c and save to total
 }
 
 //I am unsure if the function above it, or this is what you would consider block, since both solve
