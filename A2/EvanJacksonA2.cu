@@ -2,8 +2,6 @@
 //Cooley Tukey
 //Joseph Williamson
 
-//cudaDeviceSynchronize();
-
 #include <stdio.h>
 #include <math.h>
 
@@ -21,7 +19,7 @@ void oddMultCalc(complex * oddDevice, int n){
         polar.real = cos(-2.0*M_PI*(i/n));
         polar.imag = sin(-2.0*M_PI*(i/n));
 
-        result.real = polar.real*oddDevice[i].real - polar.imag-oddDevice[i].imag;
+        result.real = polar.real*oddDevice[i].real - polar.imag*oddDevice[i].imag;
         result.imag = polar.real*oddDevice[i].imag + polar.imag*oddDevice[i].real;
 
         oddDevice[i] = result;
@@ -96,7 +94,9 @@ complex *CT_FFT(complex* table, int n){
     dim3 dimBlock(1024,1,1);
 
     oddMultCalc<<<dimGrid, dimBlock>>>(oddDevice, n);
+    cudaDeviceSynchronize();
     addOddEven<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice, n);
+    cudaDeviceSynchronize();
 
     cudaMemcpy(X, XDevice, SIZE, cudaMemcpyDeviceToHost);
     free(EVEN);
