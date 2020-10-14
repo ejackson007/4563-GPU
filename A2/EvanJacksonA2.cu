@@ -108,7 +108,7 @@ complex *CT_FFT(complex* table, int n){
     free(ODD);
     cudaFree(oddDevice);
     cudaFree(evenDevice);
-    //cudaFree(XDevice);
+    cudaFree(XDevice);
     return X;
 }
 
