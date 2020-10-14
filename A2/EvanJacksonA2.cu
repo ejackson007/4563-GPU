@@ -29,7 +29,7 @@ void oddMultCalc(complex * oddDevice, int n){
     }
 }
 
-__global__
+__global
 void addOddEven(complex * oddDevice, complex * evenDevice, complex * XDevice, int n){
     int i = threadIdx.x + blockDim.x * blockIdx.x;
     if (i < n/2){
