@@ -63,48 +63,45 @@ complex *fillArray(int size){
 }
 
 complex *CT_FFT(complex* table, int n){
-    complex *X = (complex *)malloc(sizeof(struct complex_t) * n);
-    complex *odd, *even, *ODD, *EVEN, *XDevice, *oddDevice, *evenDevice;
-    
+    complex* X = (complex*) malloc(sizeof(struct complex_t) * N);
+    complex * d, * e, * D, * E;
+    int k;
 
-    if (n == 1){
-        X[0] = table[0];
+    if (N == 1) {
+        X[0] = x[0];
         return X;
     }
 
-    even = (complex *)malloc(sizeof(struct complex_t) * n/2);
-    odd = (complex *)malloc(sizeof(struct complex_t) * n/2);
-    //assing odd and even values
-    for(int i = 0; i < n/2; i++){
-        even[i] = table[2*i];
-        odd[i] = table[2*i + 1];
+    e = (complex*) malloc(sizeof(struct complex_t) * N/2);
+    d = (complex*) malloc(sizeof(struct complex_t) * N/2);
+    for(k = 0; k < N/2; k++) {
+        e[k] = x[2*k];
+        d[k] = x[2*k + 1];
     }
 
-    EVEN = CT_FFT(even, n/2);
-    ODD = CT_FFT(odd, n/2);
+    E = FFT_simple(e, N/2);
+    D = FFT_simple(d, N/2);
+    
+    for(k = 0; k < N/2; k++) {
+        /* Multiply entries of D by the twiddle factors e^(-2*pi*i/N * k) */
+        D[k] = complex_mult(complex_from_polar(1, -2.0*M_PI*k/N), D[k]);
+    }
 
-    cudaMalloc(&oddDevice, n/2);
-    cudaMalloc(&evenDevice, n/2);
-    cudaMalloc(&XDevice, n);
-    cudaMemcpy(oddDevice, ODD, n/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(evenDevice, EVEN, n/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(XDevice, X, n, cudaMemcpyHostToDevice);
+    for(k = 0; k < N/2; k++) {
+        X[k]       = complex_add(E[k], D[k]);
+        X[k + N/2] = complex_sub(E[k], D[k]);
+    }
 
-    dim3 dimGrid(4,1,1);
-    dim3 dimBlock(1024,1,1);
-
-    oddMultCalc<<<dimGrid, dimBlock>>>(oddDevice, n);
-    cudaDeviceSynchronize();
-    addOddEven<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice, n);
-    cudaDeviceSynchronize();
-
-    cudaMemcpy(X, XDevice, SIZE, cudaMemcpyDeviceToHost);
-    free(EVEN);
-    free(ODD);
-    cudaFree(oddDevice);
-    cudaFree(evenDevice);
-    cudaFree(XDevice);
+    free(D);
+    free(E);
     return X;
+}
+
+complex complex_from_polar(double r, double theta_radians) {
+    complex result;
+    result.re = cos(theta_radians);
+    result.im = sin(theta_radians);
+    return result;
 }
 
 int main(){
