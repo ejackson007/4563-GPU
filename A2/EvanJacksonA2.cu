@@ -1,19 +1,47 @@
-//Evan Jackson
-//Cooley Tukey
-//Joseph Williamson
-
-//cudaDeviceSynchronize();
+//*****************************************************************************
+// Assignment #2
+// Evan Jackson and Joseph Williamson
+// GPU Programming Date: (10/15/2020)
+//*****************************************************************************
+// This program solves a Fast Fourier Transform using the Cooley-Tukey
+// Algorithm, also known as Radix-2. It does this by recursively cutting the 
+// table in half creating an "Even" and "Odd" part until they are individuals
+// in which case it goes back up the stack operating the function on each
+// layer. The GPU is taken advantage of here by working on the arithmetic
+// part of the algorithm, as it is the most time consuming part. Given
+// the amount of threads, each layer arithmetic can be handled virtually 
+// O(1) time. The input is hard coded in the program, and therefore needs 
+// no input file. 
+// 
+// TO RUN PROGRAM:
+//
+// 1) Put EvanJacksonJosephWilliamson.cu and A2Script in the same directory
+//    in maverick2
+// 2) run command "sbatch A2Script" in terminal while in the same directory as
+//    the files. 
+// 3) results will be show in file named "mysimplejob.xxxxxx.out"
+//****************************************************************************
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <math.h>//used for cos, sin, and PI
 
 #define SIZE 8192
+//complex.h is not included in cuda, therefore our own
+//complex struct is created.
 typedef struct complex_t {
     double real;
     double imag;
 } complex;
 
+/*
+__device__ complex dPolar()
+Parameters: double theta
+This is a function that can only be called by the device. This
+function carries out the e^(-2.0*M_PI*i/n) part of the FFT function.
+theta == (-2.0*M_PI*i/n) where i is the thread id
+returns the results of the operation. 
+*/
 __device__ complex dPolar(double theta){
     complex result;
     result.real = cos(theta);
@@ -21,7 +49,9 @@ __device__ complex dPolar(double theta){
     return result;
 }
 
-
+/*
+__device__ complex dAdd()
+*/
 __device__ complex dAdd(complex l, complex r){
     complex result;
     result.real = l.real + r.real;
