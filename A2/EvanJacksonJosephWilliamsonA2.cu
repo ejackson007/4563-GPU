@@ -17,7 +17,7 @@
 //
 // 1) Put EvanJacksonJosephWilliamsonA2.cu and A2Script in the same directory
 //    in maverick2
-// 2) run command "sbatch A2Script" in terminal while in the same directory as
+// 2) run command "sbatch A2script" in terminal while in the same directory as
 //    the files. 
 // 3) results will be show in file named "mysimplejob.xxxxxx.out"
 //****************************************************************************
