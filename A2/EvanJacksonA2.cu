@@ -22,7 +22,7 @@ void oddMultCalc(complex * oddDevice, int n){
         polar.real = cos(-2.0*M_PI*(i/n));
         polar.imag = sin(-2.0*M_PI*(i/n));
 
-        result.real = polar.real*oddDevice[i].real - polar.imag-oddDevice[i].imag;
+        result.real = polar.real*oddDevice[i].real - polar.imag*oddDevice[i].imag;
         result.imag = polar.real*oddDevice[i].imag + polar.imag*oddDevice[i].real;
 
         oddDevice[i] = result;
@@ -37,8 +37,8 @@ void addOddEven(complex * oddDevice, complex * evenDevice, complex * XDevice, in
         XDevice[i].real = evenDevice[i].real + oddDevice[i].real;
         XDevice[i].imag = evenDevice[i].imag + oddDevice[i].imag;
         //subtract
-        XDevice[i + n/2].real = evenDevice[i].real - oddDevice[i].real;
-        XDevice[i + n/2].imag = evenDevice[i].imag - oddDevice[i].imag;
+        XDevice[(i + n)/2].real = evenDevice[i].real - oddDevice[i].real;
+        XDevice[(i + n)/2].imag = evenDevice[i].imag - oddDevice[i].imag;
     }
 }
 
@@ -88,22 +88,22 @@ complex *CT_FFT(complex* table, int n){
     EVEN = CT_FFT(even, n/2);
     ODD = CT_FFT(odd, n/2);
 
-    cudaMalloc(&oddDevice, SIZE/2);
-    cudaMalloc(&evenDevice, SIZE/2);
-    cudaMalloc(&XDevice, SIZE);
-    cudaMemcpy(oddDevice, ODD, SIZE/2, cudaMemcpyHostToDevice);
-    cudaMemcpy(evenDevice, EVEN, SIZE/2, cudaMemcpyHostToDevice);
+    cudaMalloc(&oddDevice, n/2);
+    cudaMalloc(&evenDevice, n/2);
+    cudaMalloc(&XDevice, n);
+    cudaMemcpy(oddDevice, ODD, n/2, cudaMemcpyHostToDevice);
+    cudaMemcpy(evenDevice, EVEN, n/2, cudaMemcpyHostToDevice);
     //cudaMemcpy(XDevice, table, n, cudaMemcpyHostToDevice);
 
     dim3 dimGrid(4,1,1);
-    cudaDeviceSynchronize();
     dim3 dimBlock(1024,1,1);
-    cudaDeviceSynchronize();
 
     oddMultCalc<<<dimGrid, dimBlock>>>(oddDevice, n);
+    cudaDeviceSynchronize();
     addOddEven<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice, n);
+    cudaDeviceSynchronize();
 
-    cudaMemcpy(X, XDevice, SIZE, cudaMemcpyDeviceToHost);
+    cudaMemcpy(X, XDevice, n, cudaMemcpyDeviceToHost);
     free(EVEN);
     free(ODD);
     cudaFree(oddDevice);
