@@ -31,7 +31,7 @@ module load cuda/10.1   #EC updated 02/10/2020
 # -o is a compilation flag
 # a.out is the name of your executable
 
-nvcc EvanJacksonA2.cu -o a.out
+nvcc EvanJacksonJosephWilliamsonA2.cu -o a.out
 
 #============================
 # LAUNCH YOUR EXECUTABLE
