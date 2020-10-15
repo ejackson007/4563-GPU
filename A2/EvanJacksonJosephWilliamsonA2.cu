@@ -252,7 +252,7 @@ int main(){
     printf("=====================================\n");
     for(int i=0; i < 8; i++){
         //print real and imaginary values
-        printf("XR[%d]: %f  XI[%d]: %fi\n", i, printing[i].real, i, printing[i].imag);
+        printf("XR[%d]: %f  XI[%d]: %f\n", i, printing[i].real, i, printing[i].imag);
         printf("=====================================\n");
     }
     return 0;
