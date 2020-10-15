@@ -62,9 +62,6 @@ void solveX(complex * oddDevice, complex * evenDevice, complex * XDevice, int n)
     }
 }
 
-
-
-
 complex *fillArray(){
     complex *all_nums = (complex *)malloc(sizeof(struct complex_t) * SIZE);
     all_nums[0].real = 3.6;
@@ -120,12 +117,12 @@ complex *CT_FFT(complex* table, int n){
     dim3 dimGrid(4,1,1);
     dim3 dimBlock(1024,1,1);
 
-    solveOdd<<<dimGrid, dimBlock>>>(oddDevice, n);
+    solveOdd2<<<dimGrid, dimBlock>>>(oddDevice, n);
     cudaDeviceSynchronize();
-    solveX<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice, n);
+    solveX2<<<dimGrid, dimBlock>>>(oddDevice, evenDevice, XDevice, n);
     cudaDeviceSynchronize();
 
-    cudaMemcpy(X, XDevice, SIZE, cudaMemcpyDeviceToHost);
+    cudaMemcpy(X, XDevice, arraySize, cudaMemcpyDeviceToHost);
     free(EVEN);
     free(ODD);
     cudaFree(oddDevice);
