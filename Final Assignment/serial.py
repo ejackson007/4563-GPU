@@ -4,17 +4,17 @@ from PIL import Image
 import time
   
 # drawing area 
-xa = -2.0
-xb = 1.0
-ya = -1.5
-yb = 1.5
+xa = -2
+xb = 1
+ya = -1
+yb = 1
   
 # max iterations allowed for color (256 max rgb)
 maxIt = 255 
   
 # image size 
-imgx = 1920
-imgy = 1920
+imgx = 1024
+imgy = 1536
 image = Image.new("RGB", (imgx, imgy)) 
 startTime = time.time();
 
@@ -30,5 +30,5 @@ for y in range(imgy):
         image.putpixel((x, y), (i % 4 * 64, i % 8 * 32, i % 16 * 16)) 
 
 endTime = time.time();
-image.show() 
+image.save('mandelSerial.png', "PNG")
 print(f"Execution time for {imgx}x{imgy} image was {endTime-startTime} seconds")
