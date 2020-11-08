@@ -16,8 +16,8 @@ yb = 1
 # max iterations allowed for color (256 max rgb)
 maxIt = 255 
 # image size 
-imgx = 1024
-imgy = 1536
+imgx = 1536 # width
+imgy = 1024 # height
 area = imgx * imgy
 
 
