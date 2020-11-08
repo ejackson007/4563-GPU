@@ -40,7 +40,9 @@ void mandel(pixel * image){
         z.real = x * (xb - xa) / (WIDTH - 1) + xa;
         c = z;
         for(j = 0; j < maxIt; j++){
-            if(absComplex(z) > 2.0){break;}
+            if(z.real*z.real + z.imag*z.imag > 4.0){
+                break;
+            }
             z.real = z.real*z.real + c.real;
             z.imag = z.imag*z.imag + c.imag;
         }
