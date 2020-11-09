@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define WIDTH 1920
-#define HEIGHT 1080
+#define WIDTH 1920.0
+#define HEIGHT 1080.0
 #define area WIDTH * HEIGHT
-#define xa -2
-#define xb 1
-#define ya -1
-#define yb 1
+#define xa -2.0
+#define xb 1.0
+#define ya -1.0
+#define yb 1.0
 #define maxIt 255
 
 typedef struct rgb{
@@ -32,15 +32,15 @@ void mandel(pixel * image){
     //get thread id
     int i = threadIdx.x + blockDim.x * blockIdx.x;
     if(i < area){
-        int x = i / HEIGHT;
-        int y = i % HEIGHT;
+        double x = i / HEIGHT;
+        double y = i % int(HEIGHT); //mod of floating point
         int j;
         complex z, c;
         z.imag = y * (yb - ya) / (HEIGHT - 1) + ya;
         z.real = x * (xb - xa) / (WIDTH - 1) + xa;
         c = z;
         for(j = 0; j < maxIt; j++){
-            if(z.real*z.real + z.imag*z.imag > 4.0){
+            if(absComplex(z) > 2.0){
                 break;
             }
             z.real = z.real*z.real + c.real;
