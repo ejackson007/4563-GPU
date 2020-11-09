@@ -13,8 +13,8 @@ yb = 1
 maxIt = 255 
   
 # image size 
-imgx = 1024
-imgy = 1536
+imgx = 1920
+imgy = 1080
 image = Image.new("RGB", (imgx, imgy)) 
 startTime = time.time();
 
