@@ -77,7 +77,7 @@ int main(){
 
     mandel(image);
 
-    printf("%d %d\n", (int)WIDTH, (int)HEIGHT);
+    printf("%d %d\n", (int)HEIGHT, (int)WIDTH);
     for(int i=0; i < area; i++){
         printf("%d %d %d\n", image[i].r, image[i].g, image[i].b);
     }
