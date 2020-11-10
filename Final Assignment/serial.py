@@ -26,8 +26,12 @@ for y in range(imgy):
         c = z 
         for i in range(maxIt): 
             if abs(z) > 2.0: break
-            z = z * z + c 
-        image.putpixel((x, y), (i % 4 * 64, i % 8 * 32, i % 16 * 16)) 
+            z = z * z + c
+        r = i % 4 * 64
+        g = i % 8 * 32
+        b = i % 16 * 16 
+        print(f"{r} {g} {b}")
+        image.putpixel((x, y), (r,g,b)) 
 
 endTime = time.time();
 image.save('mandelSerial.png', "PNG")

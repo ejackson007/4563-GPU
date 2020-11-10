@@ -3,7 +3,7 @@ import time
 import math
 
 startTime = time.time();
-with open('serialAnswers', 'r') as f:
+with open('output', 'r') as f:
     width, height = map(int, f.readline().split())
     image = Image.new("RGB", (width, height))
     for i in range(width*height):
@@ -12,7 +12,7 @@ with open('serialAnswers', 'r') as f:
         r,g,b = map(int, f.readline().split())
         image.putpixel((x,y), (r,g,b))
 endTime = time.time();
-image.save('mandelRead.png', "PNG")
+image.save('mandelRead2.png', "PNG")
 print(f"Execution time for {width}x{height} image was {endTime-startTime} seconds")
 
 
