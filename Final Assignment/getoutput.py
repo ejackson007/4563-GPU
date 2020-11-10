@@ -17,8 +17,13 @@ for y in range(imgy):
         zx = x * (xb - xa) / (imgx - 1)  + xa 
         z = zx + zy * 1j
         c = z 
-        print(f"z = {z}")
+        #print(f"z = {z}")
         for i in range(maxIt): 
             if abs(z) > 2.0: break
             z = z * z + c 
-        print(f"j is {i}")
+        #print(f"zOut = {z}")
+        #print(f"j = {i}")
+        r = i % 4 * 64
+        g = i % 8 * 32
+        b = i % 16 * 16
+        print(f"{r} {g} {b}")

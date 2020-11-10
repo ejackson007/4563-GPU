@@ -65,7 +65,7 @@ int main(){
 
     cudaMemcpy(image, imageDevice, imageSize, cudaMemcpyDeviceToHost);
     cudaFree(imageDevice);
-    printf("%d %d\n", WIDTH, HEIGHT);
+    printf("%d %d\n", (int)WIDTH, (int)HEIGHT);
     for(int i=0; i < area; i++){
         printf("%d %d %d\n", image[i].r, image[i].g, image[i].b);
     }

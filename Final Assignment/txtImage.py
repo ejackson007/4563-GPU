@@ -3,7 +3,7 @@ import time
 import math
 
 startTime = time.time();
-with open('rgbs', 'r') as f:
+with open('serialAnswers', 'r') as f:
     width, height = map(int, f.readline().split())
     image = Image.new("RGB", (width, height))
     for i in range(width*height):
