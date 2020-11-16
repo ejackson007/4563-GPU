@@ -1,12 +1,12 @@
-//Calculate Mandelbrot set in serial
+// caculate all the rgb values
+// calculating wrong image, but is creating a image!
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
 
-//.0 used so they are used as doubles
-#define WIDTH 1920.0
-#define HEIGHT 1080.0
+#define WIDTH 7680.0
+#define HEIGHT 4320.0
 #define area WIDTH * HEIGHT
 #define xa -2.0
 #define xb 1.0
@@ -55,12 +55,15 @@ void mandel(pixel * image){
             z.real = zx;
             z.imag = zy;
             c = z;
+            //printf("z = %0.16f %0.16f\n", z.real, z.imag);
             for(j = 0; j < maxIt; j++){
                 if(absComplex(z) > 2){
                     break;
                 }
                 z = addComplex(sqComplex(z), c);
             }
+            //printf("zOut = %0.16f %0.16f\n", z.real, z.imag);
+            //printf("j = %d\n", j);
             image[pos].r = j % 4 * 64;
             image[pos].g = j % 8 * 32;
             image[pos].b = j % 16 * 16;
@@ -72,18 +75,25 @@ void mandel(pixel * image){
 int main(){
     clock_t start, end;
     double cpu_time_used;
-    long int imageSize = sizeof(struct rgb) * area;
+    int imageSize = sizeof(struct rgb) * area;
     pixel *image = (pixel *)malloc(imageSize);
-
-    start = clock();
-    mandel(image);
-    end = clock();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-
+    
     printf("%d %d\n", (int)HEIGHT, (int)WIDTH);
-    for(int i=0; i < area; i++){
-        printf("%d %d %d\n", image[i].r, image[i].g, image[i].b);
+
+    for(int i=1; i <= 10; i++){
+        printf("Entered Loop\n");
+        start = clock();
+        //printf("Took first clock");
+        mandel(image);
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("Iteration %d took %f seconds\n", i, cpu_time_used);
     }
-    printf("Execution took %f seconds\n", cpu_time_used);
+
+    // printf("%d %d\n", (int)HEIGHT, (int)WIDTH);
+    // for(int i=0; i < area; i++){
+    //     printf("%d %d %d\n", image[i].r, image[i].g, image[i].b);
+    // }
     return 0;
 }
+

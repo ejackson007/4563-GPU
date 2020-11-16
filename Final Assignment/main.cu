@@ -1,9 +1,10 @@
-// caculate all the rgb values
-// calculating wrong image, but is creating a image!
+// Calculate Mandelbrot in Cuda
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
+//.0 used fo program uses it as double
 #define WIDTH 1920.0
 #define HEIGHT 1080.0
 #define area WIDTH * HEIGHT
@@ -56,15 +57,12 @@ void mandel(pixel * image){
         z.real = zx;
         z.imag = zy;
         c = z;
-        //printf("z = %0.16f %0.16f\n", z.real, z.imag);
         for(j = 0; j < maxIt; j++){
             if(absComplex(z) > 2){
                 break;
             }
             z = addComplex(sqComplex(z), c);
         }
-        //printf("zOut = %0.16f %0.16f\n", z.real, z.imag);
-        //printf("j = %d\n", j);
         image[i].r = j % 4 * 64;
         image[i].g = j % 8 * 32;
         image[i].b = j % 16 * 16;
@@ -72,7 +70,9 @@ void mandel(pixel * image){
 }
 
 int main(){
-    int imageSize = sizeof(struct rgb) * area;
+    clock_t start, end;
+    double cpu_time_used;
+    long int imageSize = sizeof(struct rgb) * area;
     pixel *image = (pixel *)malloc(imageSize), *imageDevice;
     
     cudaMalloc(&imageDevice, imageSize);
@@ -80,13 +80,18 @@ int main(){
     dim3 gridDim(area/1024, 1, 1);
     dim3 dimBlock(1024,1,1);
 
-    mandel<<<gridDim, dimBlock>>>(imageDevice);
+    start = clock();
+    mandel<<<gridDim, dimBlock>>>(imageDevice); 
+    cudaDeviceSynchronize();
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
     cudaMemcpy(image, imageDevice, imageSize, cudaMemcpyDeviceToHost);
     cudaFree(imageDevice);
-    printf("%d %d\n", (int)HEIGHT, (int)WIDTH);
+    printf("%d %d\n", (int)WIDTH, (int)HEIGHT);
     for(int i=0; i < area; i++){
         printf("%d %d %d\n", image[i].r, image[i].g, image[i].b);
     }
+    printf("Execution took %f seconds\n", cpu_time_used);
     return 0;
 }

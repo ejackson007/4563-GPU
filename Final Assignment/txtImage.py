@@ -15,5 +15,3 @@ endTime = time.time();
 #image = image.rotate(90, expand=True)
 image.save('mandelRead2.png', "PNG")
 print(f"Execution time for {width}x{height} image was {endTime-startTime} seconds")
-
-

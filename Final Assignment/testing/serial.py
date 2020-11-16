@@ -13,8 +13,8 @@ yb = 1
 maxIt = 255 
   
 # image size 
-imgx = 1920
-imgy = 1080
+imgx = 2889
+imgy = 1907
 image = Image.new("RGB", (imgx, imgy)) 
 startTime = time.time();
 
@@ -30,7 +30,7 @@ for y in range(imgy):
         r = i % 4 * 64
         g = i % 8 * 32
         b = i % 16 * 16 
-        print(f"{r} {g} {b}")
+        #print(f"{r} {g} {b}")
         image.putpixel((x, y), (r,g,b)) 
 
 endTime = time.time();
